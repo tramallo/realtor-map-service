@@ -105,14 +105,24 @@ export class SupabaseService {
     async createRealtor(newRealtorData: CreateRealtorData): SupabaseResponse<RealtorData> {
         console.log(`supabaseService -> createRealtor ${newRealtorData.name}`)
         const { data, error } = await this.supabase.from("realtor").insert(newRealtorData).select();
-        
-        return error ? { error } : { data: data[0] };
+       
+        if(error) {
+          return { error };
+        }
+
+        this.gateway.notifyCreatedRealtor(data[0]);
+        return { data: data[0] };
     }
     async updateRealtor(realtorId: RealtorData["id"], updateData: UpdateRealtorData): SupabaseResponse<RealtorData> {
         console.log(`supabaseService -> updateRealtor ${realtorId}`)
         const { data, error } = await this.supabase.from("realtor").update(updateData).eq("id", realtorId).select();
 
-        return error ? { error } : { data: data[0] };
+        if(error) {
+          return { error };
+        }
+
+        this.gateway.notifyUpdatedRealtor(data[0]);
+        return { data: data[0] };
     }
 
     async getPersons(): SupabaseResponse<PersonData[]> {
@@ -146,7 +156,12 @@ export class SupabaseService {
         console.log(`supabaseService -> createPerson ${newPersonData.name}`)
         const { data, error } = await this.supabase.from("person").insert(newPersonData).select();
 
-        return error ? { error } : { data: data[0] };
+        if(error) {
+          return { error };
+        }
+
+        this.gateway.notifyCreatedPerson(data[0]);
+        return { data: data[0] };
     }
     async updatePerson(personId: PersonData["id"], updateData: UpdatePersonData): SupabaseResponse<PersonData> {
         console.log(`supabaseService -> updatePerson ${personId}`)
@@ -156,6 +171,7 @@ export class SupabaseService {
             return { error }
         }
 
+        this.gateway.notifyUpdatedPerson(data[0]);
         return { data: data[0] };
     }
 }
